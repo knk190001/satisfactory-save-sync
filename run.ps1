@@ -27,7 +27,7 @@ function Run-Game {
 
     # Start the game process
     Write-Host "Starting the game..."
-    Write-Log "Start-Process steam://rungameid/$gameID"
+    Log-Action "Start-Process steam://rungameid/$gameID"
     $gameProcess = Start-Process steam://rungameid/$gameID
 
 
