@@ -3,7 +3,7 @@ $confFile = "conf.txt"
 $savesFile = "saves.txt"
 $savesDir = "./saves"
 $backupDir = "./backup"
-source ./logger.ps1
+. ./logger.ps1
 # Ensure necessary directories exist
 if (-not (Test-Path -Path $savesDir)) {
     New-Item -ItemType Directory -Path $savesDir
