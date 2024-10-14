@@ -1,2 +1,2 @@
-save_path=C:\Users\hsr30\Documents\dummy-saves
+save_path=%LOCALAPPDATA%\FactoryGame\Saved\SaveGames
 game_id=526870

@@ -27,55 +27,16 @@ function Run-Game {
 
     # Start the game process
     Write-Host "Starting the game..."
-    Log-Action "Start-Process steam://rungameid/$gameID"
-    $gameProcess = Start-Process steam://rungameid/$gameID
+    Log-Action "Start-Process steam://rungameid/$gameID -PassThru"
+    $gameProcess = Start-Process steam://rungameid/$gameID -PassThru
 
 
-    # Monitor the folder for changes while the game is running
-    $savePath = Get-Content "conf.txt" | Where-Object { $_ -match "^save_path=" } | ForEach-Object { $_ -replace "^save_path=", "" }
-
-    if (-not (Test-Path -Path $savePath)) {
-        Write-Host "Save path not set. Use 'set-save-path' first."
-        exit
-    }
-
-    # Set up file system watcher for the save path
-    $watcher = New-Object System.IO.FileSystemWatcher
-    $watcher.Path = $savePath
-    $watcher.IncludeSubdirectories = $false
-    $watcher.Filter = "*.*"
-    $watcher.NotifyFilter = [System.IO.NotifyFilters]::FileName, [System.IO.NotifyFilters]::LastWrite
-
-    # Event triggered when a file is changed in the save path
-    $changedEvent = Register-ObjectEvent $watcher 'Changed' -Action {
-        Write-Host "File changed in save path: $($Event.SourceEventArgs.Name)"
-        Log-Action "File changed in save path: $($Event.SourceEventArgs.Name)"
-
-        # Sync the saves after a change
-        & powershell -File $originalScriptPath "sync-saves"
-
-        # Push the changes
-        & powershell -File $originalScriptPath "push"
-    }
-
-    # Start watching
-    $watcher.EnableRaisingEvents = $true
-
-    # Wait for the game process to exit
-    $gameProcess.WaitForExit()
-
-    # Cleanup
-    $watcher.EnableRaisingEvents = $false
-    Unregister-Event -SourceIdentifier $changedEvent.Name
-    Write-Host "Game has exited. Stopping monitoring."
+   
 }
 
 # Command execution
 switch ($args[0]) {
-    "run-game" {
-        Run-Game
-    }
     Default {
-        Write-Host "Invalid command. Use 'run-game'."
+        Run-Game
     }
 }
