@@ -1,3 +1,4 @@
 conf.txt
-log.txt
+logs/
 backup/
+configs/config-local.txt
