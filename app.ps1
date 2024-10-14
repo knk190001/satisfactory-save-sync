@@ -135,11 +135,11 @@ switch ($args[0]) {
         Log-Action "Set save path to $savePath"
     }
 
-    "set-game-path" {
-        $gamePath = Read-Host "Enter game path"
-        "game_path=$gamePath" | Add-Content $confFile
-        Write-Host "Game path set."
-        Log-Action "Set game path to $gamePath"
+    "set-game-id" {
+        $gameID = Read-Host "Enter game ID (for satisfactory use: 526870)"
+        "game_id=$gameID" | Add-Content $confFile
+        Write-Host "Game ID set."
+        Log-Action "Set game ID to $gameID"
     }
 
     "add-save-name" {
@@ -195,7 +195,7 @@ switch ($args[0]) {
 
     Default {
         Write-Host "Invalid command. Use one of the following:"
-        Write-Host "set-save-path, set-game-path, add-save-name, push, pull, copy-saves, sync-saves"
+        Write-Host "set-save-path, set-game-id, add-save-name, push, pull, copy-saves, sync-saves"
         Log-Action "Invalid command: $args[0]"
     }
 }

@@ -22,16 +22,17 @@ function Run-Game {
     & powershell -File $originalScriptPath "push"
 
     # Get the game path from conf.txt
-    $gamePath = Get-Content "conf.txt" | Where-Object { $_ -match "^game_path=" } | ForEach-Object { $_ -replace "^game_path=", "" }
+    $gameID = Get-Content "conf.txt" | Where-Object { $_ -match "^game_id=" } | ForEach-Object { $_ -replace "^game_path=", "" }
 
-    if (-not (Test-Path -Path $gamePath)) {
-        Write-Host "Game path does not exist: $gamePath"
+    if (-not (Test-Path -Path $gameID)) {
+        Write-Host "Game ID does not exist: $gameID"
         exit
     }
 
     # Start the game process
     Write-Host "Starting the game..."
-    $gameProcess = Start-Process -FilePath $gamePath -PassThru
+    $gameProcess = Start-Process steam://rungameid/$gameID -PassThru
+
 
     # Monitor the folder for changes while the game is running
     $savePath = Get-Content "conf.txt" | Where-Object { $_ -match "^save_path=" } | ForEach-Object { $_ -replace "^save_path=", "" }

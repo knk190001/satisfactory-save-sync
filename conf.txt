@@ -1,2 +1,2 @@
 save_path=C:\Users\hsr30\Documents\dummy-saves
-game_path=steam://rungameid/526870
+game_id=526870
