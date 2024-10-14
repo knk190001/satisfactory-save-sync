@@ -27,6 +27,24 @@ function Get-GamePath {
     return $gamePathLine -replace "^game_path=", ""
 }
 
+# Function to load regex patterns from saves.txt
+function Get-SaveRegexPatterns {
+    if (Test-Path -Path $savesFile) {
+        return Get-Content $savesFile
+    }
+    return @()
+}
+
+# Function to check if a file matches any regex from saves.txt
+function Matches-AnyRegex($fileName, $regexes) {
+    foreach ($regex in $regexes) {
+        if ($fileName -match $regex) {
+            return $true
+        }
+    }
+    return $false
+}
+
 # Commands
 switch ($args[0]) {
     "set-save-path" {
@@ -68,9 +86,24 @@ switch ($args[0]) {
         if (-not $savePath) {
             Write-Host "Save path not set. Use 'set-save-path' first."
         } else {
-            Copy-Item -Path "$savePath\*" -Destination $savesDir -Recurse -Force
-            Write-Host "Saves copied to script location."
-            Log-Action "Copied saves from $savePath to $savesDir"
+            $regexPatterns = Get-SaveRegexPatterns
+
+            if ($regexPatterns.Count -eq 0) {
+                Write-Host "No regex patterns found in saves.txt."
+                Log-Action "No regex patterns found in saves.txt."
+            } else {
+                $filesCopied = 0
+
+                Get-ChildItem -Path $savePath -File | ForEach-Object {
+                    if (Matches-AnyRegex $_.Name $regexPatterns) {
+                        Copy-Item -Path $_.FullName -Destination $savesDir -Force
+                        $filesCopied++
+                    }
+                }
+
+                Write-Host "$filesCopied file(s) copied to script location."
+                Log-Action "Copied $filesCopied file(s) matching regex from $savePath to $savesDir"
+            }
         }
     }
 
@@ -79,17 +112,40 @@ switch ($args[0]) {
         if (-not $savePath) {
             Write-Host "Save path not set. Use 'set-save-path' first."
         } else {
-            $scriptLastModified = Get-ChildItem -Path $savesDir -File | Sort-Object LastWriteTime | Select-Object -Last 1
-            $externalLastModified = Get-ChildItem -Path $savePath -File | Sort-Object LastWriteTime | Select-Object -Last 1
+            $regexPatterns = Get-SaveRegexPatterns
 
-            if ($externalLastModified.LastWriteTime -gt $scriptLastModified.LastWriteTime) {
-                Copy-Item -Path "$savePath\*" -Destination $savesDir -Recurse -Force
-                Write-Host "Saves synced from save path to script."
-                Log-Action "Synced saves from $savePath to $savesDir"
+            if ($regexPatterns.Count -eq 0) {
+                Write-Host "No regex patterns found in saves.txt."
+                Log-Action "No regex patterns found in saves.txt."
             } else {
-                Copy-Item -Path "$savesDir\*" -Destination $savePath -Recurse -Force
-                Write-Host "Saves synced from script to save path."
-                Log-Action "Synced saves from $savesDir to $savePath"
+                $scriptLastModified = Get-ChildItem -Path $savesDir -File | Sort-Object LastWriteTime | Select-Object -Last 1
+                $externalLastModified = Get-ChildItem -Path $savePath -File | Sort-Object LastWriteTime | Select-Object -Last 1
+
+                if ($externalLastModified.LastWriteTime -gt $scriptLastModified.LastWriteTime) {
+                    $filesCopied = 0
+
+                    Get-ChildItem -Path $savePath -File | ForEach-Object {
+                        if (Matches-AnyRegex $_.Name $regexPatterns) {
+                            Copy-Item -Path $_.FullName -Destination $savesDir -Force
+                            $filesCopied++
+                        }
+                    }
+
+                    Write-Host "Saves synced from save path to script ($filesCopied file(s) copied)."
+                    Log-Action "Synced saves from $savePath to $savesDir ($filesCopied file(s))"
+                } else {
+                    $filesCopied = 0
+
+                    Get-ChildItem -Path $savesDir -File | ForEach-Object {
+                        if (Matches-AnyRegex $_.Name $regexPatterns) {
+                            Copy-Item -Path $_.FullName -Destination $savePath -Force
+                            $filesCopied++
+                        }
+                    }
+
+                    Write-Host "Saves synced from script to save path ($filesCopied file(s) copied)."
+                    Log-Action "Synced saves from $savesDir to $savePath ($filesCopied file(s))"
+                }
             }
         }
     }

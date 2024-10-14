@@ -1,2 +1,5 @@
 2024-10-15 00:05:55 - Set save path to C:\Users\hsr30\Documents\dummy-saves
 2024-10-15 00:06:45 - Added save name factory
+2024-10-15 00:10:01 - Copied saves from C:\Users\hsr30\Documents\dummy-saves to ./saves
+2024-10-15 00:13:09 - Copied 2 file(s) matching regex from C:\Users\hsr30\Documents\dummy-saves to ./saves
+2024-10-15 00:13:20 - Invalid command: push-saves[0]
