@@ -27,8 +27,8 @@ function Run-Game {
 
     # Start the game process
     Write-Host "Starting the game..."
-    Write-Log "Start-Process steam://rungameid/$gameID"
-    $gameProcess = Start-Process steam://rungameid/$gameID
+    Log-Action "Start-Process steam://rungameid/$gameID -PassThru"
+    $gameProcess = Start-Process steam://rungameid/$gameID -PassThru
 
 
     # Monitor the folder for changes while the game is running
