@@ -1,5 +1,6 @@
 # Define the path to the original script
 $originalScriptPath = "./app.ps1"
+source ./logger.ps1
 
 # Ensure the original script exists
 if (-not (Test-Path -Path $originalScriptPath)) {

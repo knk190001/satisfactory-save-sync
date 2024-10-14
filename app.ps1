@@ -3,8 +3,7 @@ $confFile = "conf.txt"
 $savesFile = "saves.txt"
 $savesDir = "./saves"
 $backupDir = "./backup"
-$logFile = "log.txt"
-
+source ./logger.ps1
 # Ensure necessary directories exist
 if (-not (Test-Path -Path $savesDir)) {
     New-Item -ItemType Directory -Path $savesDir
@@ -14,10 +13,7 @@ if (-not (Test-Path -Path $backupDir)) {
 }
 
 # Logging function
-function Log-Action {
-    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-    Add-Content $logFile "$timestamp - $args"
-}
+
 
 # Function to get the save path from conf.txt
 function Get-SavePath {
