@@ -200,6 +200,8 @@ switch ($args[0]) {
     "sync-saves" {
         Sync-SavesLocally
         Push
+        Write-Host "Synced saves with remote successfully."
+        Log-Action "Synced saves with remote successfully."
     }
 
     Default {
