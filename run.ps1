@@ -24,11 +24,6 @@ function Run-Game {
     # Get the game path from conf.txt
     $gameID = Get-Content "conf.txt" | Where-Object { $_ -match "^game_id=" } | ForEach-Object { $_ -replace "^game_path=", "" }
 
-    if (-not (Test-Path -Path $gameID)) {
-        Write-Host "Game ID does not exist: $gameID"
-        exit
-    }
-
     # Start the game process
     Write-Host "Starting the game..."
     $gameProcess = Start-Process steam://rungameid/$gameID -PassThru
