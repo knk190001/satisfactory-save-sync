@@ -18,9 +18,6 @@ function Run-Game {
     Write-Host "Syncing saves..."
     & powershell -File $originalScriptPath "sync-saves"
 
-    # Push changes
-    Write-Host "Pushing changes..."
-    & powershell -File $originalScriptPath "push"
 
     # Get the game path from conf.txt
     $gameID = Get-Content "conf.txt" | Where-Object { $_ -match "^game_id=" } | ForEach-Object { $_ -replace "^game_id=", "" }
@@ -30,13 +27,20 @@ function Run-Game {
     Log-Action "Start-Process steam://rungameid/$gameID -PassThru"
     $gameProcess = Start-Process steam://rungameid/$gameID -PassThru
 
+    Write-Host "Game Process ID: $($gameProcess.Id)"
+    Log-Action "Game Process ID: $($gameProcess.Id)"
+
 
    
 }
+
 
 # Command execution
 switch ($args[0]) {
     Default {
         Run-Game
+    }
+    "create-shortcut" {
+        Create-RunGameShortcut
     }
 }
