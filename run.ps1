@@ -23,11 +23,11 @@ function Run-Game {
     & powershell -File $originalScriptPath "push"
 
     # Get the game path from conf.txt
-    $gameID = Get-Content "conf.txt" | Where-Object { $_ -match "^game_id=" } | ForEach-Object { $_ -replace "^game_path=", "" }
+    $gameID = Get-Content "conf.txt" | Where-Object { $_ -match "^game_id=" } | ForEach-Object { $_ -replace "^game_id=", "" }
 
     # Start the game process
     Write-Host "Starting the game..."
-    Log-Action "Start-Process steam://rungameid/$gameID"
+    Write-Log "Start-Process steam://rungameid/$gameID"
     $gameProcess = Start-Process steam://rungameid/$gameID
 
 
