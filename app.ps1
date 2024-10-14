@@ -115,10 +115,10 @@ function Sync-Saves {
 
 # Function to generate commit message
 function Generate-CommitMessage {
-    $hostname = (Get-ComputerInfo).CsName
+
     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
     $filesAdded = git status --porcelain | Where-Object { $_ -match "^A" } | Measure-Object | Select-Object -ExpandProperty Count
-    return "Commit from $hostname at $timestamp, $filesAdded file(s) added"
+    return "Commit from $env:UserName at $timestamp, $filesAdded file(s) added"
 }
 
 
