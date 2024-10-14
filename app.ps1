@@ -58,7 +58,7 @@ function Backup-RemoteFile {
 }
 
 # Sync each save file by comparing modification times
-function Sync-Saves {
+function Sync-SavesLocally {
     $savePath = Get-SavePath
     if (-not $savePath) {
         Write-Host "Save path not set. Use 'set-save-path' first."
@@ -86,13 +86,15 @@ function Sync-Saves {
             Copy-Item -Path $localFile.FullName -Destination $savePath -Force
             Write-Host "Copied local file '$($localFile.Name)' to save path."
             Log-Action "Copied local file '$($localFile.Name)' to $savePath"
-        } elseif ($localFile.LastWriteTime -gt $remoteFile.LastWriteTime) {
+        }
+        elseif ($localFile.LastWriteTime -gt $remoteFile.LastWriteTime) {
             # If the local file is newer, backup remote file first, then copy
             Backup-RemoteFile $remoteFile
             Copy-Item -Path $localFile.FullName -Destination $savePath -Force
             Write-Host "Backed up and copied newer local file '$($localFile.Name)' to save path."
             Log-Action "Backed up and copied newer local file '$($localFile.Name)' to $savePath"
-        } elseif ($remoteFile.LastWriteTime -gt $localFile.LastWriteTime) {
+        }
+        elseif ($remoteFile.LastWriteTime -gt $localFile.LastWriteTime) {
             # If the remote file is newer, copy it to local
             Copy-Item -Path $remoteFile.FullName -Destination $savesDir -Force
             Write-Host "Copied newer remote file '$($remoteFile.Name)' to saves folder."
@@ -121,6 +123,16 @@ function Generate-CommitMessage {
     return "Commit from $env:UserName at $timestamp, $filesAdded file(s) added"
 }
 
+function Push {
+    git add .
+    $commitMessage = Generate-CommitMessage
+    git commit -m "$commitMessage"
+    git push origin main
+    Write-Host "Pushed to main with commit message: $commitMessage"
+    Log-Action "Pushed to main with commit message: $commitMessage"
+    
+}
+
 
 # Commands
 switch ($args[0]) {
@@ -146,12 +158,7 @@ switch ($args[0]) {
     }
 
     "push" {
-        git add .
-        $commitMessage = Generate-CommitMessage
-        git commit -m "$commitMessage"
-        git push origin main
-        Write-Host "Pushed to main with commit message: $commitMessage"
-        Log-Action "Pushed to main with commit message: $commitMessage"
+        Push
     }
 
     "pull" {
@@ -163,13 +170,15 @@ switch ($args[0]) {
         $savePath = Get-SavePath
         if (-not $savePath) {
             Write-Host "Save path not set. Use 'set-save-path' first."
-        } else {
+        }
+        else {
             $regexPatterns = Get-SaveRegexPatterns
 
             if ($regexPatterns.Count -eq 0) {
                 Write-Host "No regex patterns found in saves.txt."
                 Log-Action "No regex patterns found in saves.txt."
-            } else {
+            }
+            else {
                 $filesCopied = 0
 
                 Get-ChildItem -Path $savePath -File | ForEach-Object {
@@ -185,8 +194,12 @@ switch ($args[0]) {
         }
     }
 
+    "sync-saves-locally" {
+        Sync-SavesLocally
+    }
     "sync-saves" {
-        Sync-Saves
+        Sync-SavesLocally
+        Push
     }
 
     Default {
