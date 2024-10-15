@@ -54,6 +54,12 @@ function Set-ConfigValue {
 }
 
 
+function Get-GameId {
+    $gameIdLine = Get-Content $configGlobalFile | Where-Object { $_ -match "^gameId=" }
+    return $gameIdLine -replace "^gameId=", ""
+    
+}
+
 # Function to get the save path from conf.txt
 function Get-SavePath {
     $savePathLine = Get-Content $configLocalFile | Where-Object { $_ -match "^save_path=" }
@@ -224,6 +230,7 @@ function SetGameId {
     Write-Host "Game ID set."
     Log-Action "Set game ID to $gameID"
 }
+
 
 function Push {
     git add .

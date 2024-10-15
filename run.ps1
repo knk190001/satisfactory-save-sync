@@ -16,8 +16,7 @@ function Run-Game {
 
 
     # Get the game path from conf.txt
-    $gameID = Get-Content "conf.txt" | Where-Object { $_ -match "^game_id=" } | ForEach-Object { $_ -replace "^game_id=", "" }
-
+    $gameID = Get-GameId
     # Start the game process
     Write-Host "Starting the game..."
     Log-Action "Start-Process steam://rungameid/$gameID -PassThru"
