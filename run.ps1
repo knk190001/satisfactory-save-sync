@@ -1,6 +1,4 @@
-# Define the path to the original script
-$originalScriptPath = "./app.ps1"
-. ./logger.ps1
+. ./app.ps1
 
 # Ensure the original script exists
 if (-not (Test-Path -Path $originalScriptPath)) {
@@ -16,7 +14,10 @@ function Run-Game {
 
     # Sync the saves
     Write-Host "Syncing saves..."
-    & powershell -File $originalScriptPath "sync-saves"
+    Sync-SavesLocally
+    Write-Host "Pushing changes..."
+    Push
+
 
 
     # Get the game path from conf.txt

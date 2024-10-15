@@ -236,7 +236,7 @@ function Push {
 }
 
 function AddSaveRegex {
-    $saveName = Read-Host "Enter regex pattern to match save files, e.g., '^factory.*\.sav$'
+    $saveName = Read-Host "Enter regex pattern to match save files, e.g., '^factory.*\.sav$'"
     $saveName | Add-Content $savesFile
     Write-Host "Save name added."
     Log-Action "Added save name $saveName"
@@ -334,6 +334,7 @@ switch ($args[0]) {
     "setup" {
         Setup
     }
+
 
     Default {
         Write-Host "Invalid command. Use one of the following:"
