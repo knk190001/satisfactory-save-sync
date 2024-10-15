@@ -1,10 +1,5 @@
 . ./app.ps1
 
-# Ensure the original script exists
-if (-not (Test-Path -Path $originalScriptPath)) {
-    Write-Host "The original script could not be found at '$originalScriptPath'."
-    exit
-}
 
 # Function to run the game
 function Run-Game {
