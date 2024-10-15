@@ -1,9 +1,12 @@
+. ./common/logger.ps1
+
 # File paths
-$confFile = "conf.txt"
-$savesFile = "saves.txt"
+$configLocalFile = "./configs/config-local.txt"
+$configGlobalFile = "./configs/config.txt"
+$savesFile = "./configs/saves.txt"
 $savesDir = "./saves"
 $backupDir = "./backup"
-. ./logger.ps1
+
 # Ensure necessary directories exist
 if (-not (Test-Path -Path $savesDir)) {
     New-Item -ItemType Directory -Path $savesDir
@@ -11,13 +14,49 @@ if (-not (Test-Path -Path $savesDir)) {
 if (-not (Test-Path -Path $backupDir)) {
     New-Item -ItemType Directory -Path $backupDir
 }
+if (-not (Test-Path -Path "./configs")) {
+    New-Item -ItemType Directory -Path "./configs"
+}
 
-# Logging function
+# Function to update or set a configuration value
+function Set-ConfigValue {
+    param (
+        [string]$Key,       # The config key (e.g., "save_path", "gameId")
+        [string]$Value,     # The value to set
+        [string]$FilePath   # The path to the config file
+    )
+
+    # Read the config file if it exists, otherwise create an empty array
+    if (Test-Path $FilePath) {
+        $configLines = Get-Content $FilePath
+    } else {
+        $configLines = @()
+    }
+
+    # Check if the key already exists
+    $keyExists = $false
+    for ($i = 0; $i -lt $configLines.Count; $i++) {
+        if ($configLines[$i] -match "^$Key=") {
+            # Key exists, update the value
+            $configLines[$i] = "$Key=$Value"
+            $keyExists = $true
+            break
+        }
+    }
+
+    # If key does not exist, append it to the config file
+    if (-not $keyExists) {
+        $configLines += "$Key=$Value"
+    }
+
+    # Write the updated config back to the file
+    $configLines | Set-Content $FilePath
+}
 
 
 # Function to get the save path from conf.txt
 function Get-SavePath {
-    $savePathLine = Get-Content $confFile | Where-Object { $_ -match "^save_path=" }
+    $savePathLine = Get-Content $configLocalFile | Where-Object { $_ -match "^save_path=" }
     return $savePathLine -replace "^save_path=", ""
 }
 
@@ -123,6 +162,69 @@ function Generate-CommitMessage {
     return "Commit from $env:UserName at $timestamp, $filesAdded file(s) added"
 }
 
+# Function to reset the folders after confirmation
+function Reset-Folders {
+    # Define the folders to be deleted
+    $foldersToDelete = @(
+        $savesDir,
+        "./configs",
+        "./logs",
+        $backupDir
+    )
+
+    # Humorous confirmation text
+    $confirmationPhrase = "delete my precious data"
+    $confirmationPrompt = @"
+Are you absolutely sure you want to delete all the following folders?
+- Saves
+- Configs
+- Logs
+- Backup
+
+If you're sure, type the following confirmation exactly:
+"$confirmationPhrase"
+"@
+
+    # Display the prompt
+    Write-Host $confirmationPrompt
+
+    # Get user input
+    $userInput = Read-Host "Type your confirmation"
+
+    # Check if the input matches the confirmation phrase
+    if ($userInput -eq $confirmationPhrase) {
+        # If confirmation matches, delete the folders
+        foreach ($folder in $foldersToDelete) {
+            if (Test-Path $folder) {
+                Remove-Item -Recurse -Force $folder
+                Write-Host "Deleted: $folder"
+            } else {
+                Write-Host "Folder not found: $folder"
+            }
+        }
+
+        # Log the reset action
+        Log-Action "Folders reset: saves, configs, logs, backup"
+    } else {
+        Write-Host "Confirmation failed. Reset aborted."
+    }
+}
+
+
+function SetSavePath {
+    $savePath = Read-Host "Enter save path"
+    Set-ConfigValue "save_path" $savePath $configLocalFile
+    Write-Host "Save path set."
+    Log-Action "Set save path to $savePath"
+}
+
+function SetGameId {
+    $gameID = Read-Host "Enter game ID (for satisfactory use: 526870)"
+    Set-ConfigValue "gameId" $gameID $configGlobalFile
+    Write-Host "Game ID set."
+    Log-Action "Set game ID to $gameID"
+}
+
 function Push {
     git add .
     $commitMessage = Generate-CommitMessage
@@ -133,41 +235,17 @@ function Push {
     
 }
 
+function AddSaveRegex {
+    $saveName = Read-Host "Enter regex pattern to match save files, e.g., '^factory.*\.sav$'
+    $saveName | Add-Content $savesFile
+    Write-Host "Save name added."
+    Log-Action "Added save name $saveName"
+}
 
-# Commands
-switch ($args[0]) {
-    "set-save-path" {
-        $savePath = Read-Host "Enter save path"
-        "save_path=$savePath" | Out-File -FilePath $confFile -Encoding UTF8
-        Write-Host "Save path set."
-        Log-Action "Set save path to $savePath"
-    }
 
-    "set-game-id" {
-        $gameID = Read-Host "Enter game ID (for satisfactory use: 526870)"
-        "game_id=$gameID" | Add-Content $confFile
-        Write-Host "Game ID set."
-        Log-Action "Set game ID to $gameID"
-    }
 
-    "add-save-name" {
-        $saveName = Read-Host "Enter save name"
-        $saveName | Add-Content $savesFile
-        Write-Host "Save name added."
-        Log-Action "Added save name $saveName"
-    }
-
-    "push" {
-        Push
-    }
-
-    "pull" {
-        git pull origin main
-        Log-Action "Pulled latest changes from main"
-    }
-
-    "copy-saves" {
-        $savePath = Get-SavePath
+function CopySaves {
+    $savePath = Get-SavePath
         if (-not $savePath) {
             Write-Host "Save path not set. Use 'set-save-path' first."
         }
@@ -192,6 +270,52 @@ switch ($args[0]) {
                 Log-Action "Copied $filesCopied file(s) matching regex from $savePath to $savesDir"
             }
         }
+    
+}
+
+
+function Setup {
+    # 1. Set Game ID
+    SetGameId
+    # 2. Set Save Path
+    SetSavePath
+    # 3. Add Save Regex
+    AddSaveRegex
+    # 4. Copy Saves
+    CopySaves
+    # 5. Push
+    Push
+    Write-Host "Setup complete."
+    Log-Action "Setup complete."
+
+}
+
+# Commands
+switch ($args[0]) {
+    "set-save-path" {
+        SetSavePath
+    }
+
+    "set-game-id" {
+        SetGameId
+     
+    }
+
+    "add-save-regex" {
+        AddSaveRegex
+    }
+
+    "push" {
+        Push
+    }
+
+    "pull" {
+        git pull origin main
+        Log-Action "Pulled latest changes from main"
+    }
+
+    "copy-saves" {
+       CopySaves
     }
 
     "sync-saves-locally" {
@@ -204,9 +328,16 @@ switch ($args[0]) {
         Log-Action "Synced saves with remote successfully."
     }
 
+    "reset" {
+        Reset-Folders
+    }
+    "setup" {
+        Setup
+    }
+
     Default {
         Write-Host "Invalid command. Use one of the following:"
-        Write-Host "set-save-path, set-game-id, add-save-name, push, pull, copy-saves, sync-saves"
+        Write-Host "set-save-path, set-game-id, add-save-name, push, pull, copy-saves, sync-save-locally, sync-saves, reset, setup"
         Log-Action "Invalid command: $args[0]"
     }
 }

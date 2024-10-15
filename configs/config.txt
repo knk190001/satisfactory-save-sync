@@ -1,2 +1,1 @@
-save_path=C:\Users\hsr30\AppData\Local\FactoryGame\Saved\SaveGames\76561198956867814
-game_id=526870
+gameId=526870

@@ -29,21 +29,9 @@ This app tampers with your save files, and can cause data loss. Use at your own 
 
 ### Installing
 
-A step by step series of examples that tell you how to get a development env running.
+1. Fork this repository to your own GitHub account
+2. Clone the repository to your local machine
 
-Say what the step will be
-
-```
-Give the example
-```
-
-And repeat
-
-```
-until finished
-```
-
-End with an example of getting some data out of the system or using it for a little demo.
 
 ## Usage <a name = "usage"></a>
 
