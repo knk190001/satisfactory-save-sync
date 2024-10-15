@@ -13,7 +13,8 @@ function Run-Game {
 
 
     # Get the game path from conf.txt
-    $gameID = Get-GameId
+    $gameID | & powershell -File $appPath "get-game-id" 
+    Write-Host "Game ID: $gameID"
     # Start the game process
     Write-Host "Starting the game..."
 

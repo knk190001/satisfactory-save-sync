@@ -353,6 +353,10 @@ switch ($args[0]) {
      
     }
 
+    "get-game-id" {
+        Get-GameId
+    }
+
     "add-save-regex" {
         AddSaveRegex
     }
@@ -394,7 +398,7 @@ switch ($args[0]) {
 
     Default {
         Write-Host "$args[0] is not a valid command, use one of the following:"
-        Write-Host "set-save-path, set-game-id, add-save-name, push, pull, copy-saves, sync-save-locally, sync-saves, reset, setup"
+        Write-Host "set-save-path, set-game-id, get-game-id, add-save-name, push, pull, copy-saves, sync-save-locally, sync-saves, reset, setup"
         Log-Action "Invalid command: $args[0]"
     }
 }
