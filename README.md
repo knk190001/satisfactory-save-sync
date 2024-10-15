@@ -75,15 +75,21 @@ The script will copy all save files from the specified path to the repository, a
 
 - To sync your save files, run the following command in powershell:
 
-    ```bash
-    .\sync.ps1
-    ```
+  ```bash
+  .\sync.ps1
+  ```
 
 - To run the game, with automatically syncing save files, run the following command in powershell:
 
-    ```bash
-    .\run.ps1
-    ```
+  ```bash
+  .\run.ps1
+  ```
+
+- To create a desktop shortcut to run game with sync, or just sync save files, run the following command in powershell:
+
+  ```bash
+  .\app.ps1 create-shortcuts
+  ```
 
 ## Documentation
 

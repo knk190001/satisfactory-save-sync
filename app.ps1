@@ -321,6 +321,8 @@ function Create-Shortcuts {
    
     $runGameShortcutPath = "$env:USERPROFILE\Desktop\RunFactoryGame.lnk"
     $syncSavesShortcutPath = "$env:USERPROFILE\Desktop\SyncFactorySaves.lnk"
+    $runGameIconPath = Resolve-Path ".\icons\run-game.ico"
+    $syncSavesIconPath = Resolve-Path ".\icons\sync-saves.ico"
 
     # Create a shortcut to run the game
     $WScriptShell = New-Object -ComObject WScript.Shell
@@ -328,6 +330,7 @@ function Create-Shortcuts {
     $Shortcut.TargetPath = "powershell.exe"
     $Shortcut.Arguments = "-File $runGamePath"
     $Shortcut.WorkingDirectory = $PSScriptRoot
+    $Shortcut.IconLocation = $runGameIconPath
     $Shortcut.Save()
 
     # Create a shortcut to sync saves
@@ -335,6 +338,7 @@ function Create-Shortcuts {
     $Shortcut.TargetPath = "powershell.exe"
     $Shortcut.Arguments = "-File $appPath sync-saves"
     $Shortcut.WorkingDirectory = $PSScriptRoot
+    $Shortcut.IconLocation = $syncSavesIconPath
     $Shortcut.Save()
 
     Write-Host "Shortcuts created on desktop."
