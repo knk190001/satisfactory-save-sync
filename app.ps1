@@ -283,7 +283,8 @@ function CopySaves {
                 $filesCopied = 0
 
                 Get-ChildItem -Path $savePath -File | ForEach-Object {
-                    if (Matches-AnyRegex $_.Name $regexPatterns) {
+                    # only copy files that match the regex patterns and endin .sav
+                    if (Matches-AnyRegex $_.Name $regexPatterns -and $_.Name -match "\.sav$") {
                         Copy-Item -Path $_.FullName -Destination $savesDir -Force
                         $filesCopied++
                     }
