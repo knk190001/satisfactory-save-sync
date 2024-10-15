@@ -21,21 +21,31 @@ if (-not (Test-Path -Path "./configs")) {
 # Function to update or set a configuration value
 function Set-ConfigValue {
     param (
-        [string]$Key,       # The config key (e.g., "save_path", "gameId")
+        [string]$Key,       # The config key (e.g., "save-path", "game-id")
         [string]$Value,     # The value to set
         [string]$FilePath   # The path to the config file
     )
 
+    # create the file if it does not exist
+    if (-not (Test-Path $FilePath)) {
+        New-Item -Path $FilePath -ItemType File -Force
+    }
+
+    # sanitize value
+    $Value = $Value -replace "`r", ""
     # Read the config file if it exists, otherwise create an empty array
     if (Test-Path $FilePath) {
-        $configLines = Get-Content $FilePath
+        $content = Get-Content $FilePath -Raw
+        $configLines = $content -split "`n"  # Split the content into an array of lines
     } else {
         $configLines = @()
     }
 
+
     # Check if the key already exists
     $keyExists = $false
     for ($i = 0; $i -lt $configLines.Count; $i++) {
+        
         if ($configLines[$i] -match "^$Key=") {
             # Key exists, update the value
             $configLines[$i] = "$Key=$Value"
@@ -44,26 +54,31 @@ function Set-ConfigValue {
         }
     }
 
+
     # If key does not exist, append it to the config file
     if (-not $keyExists) {
         $configLines += "$Key=$Value"
     }
+    
+    # Join the lines back into a single string
+    $configLines = $configLines -join "`n"
+    
 
     # Write the updated config back to the file
-    $configLines | Set-Content $FilePath
+    $configLines | Set-Content $FilePath -NoNewline 
 }
 
 
 function Get-GameId {
-    $gameIdLine = Get-Content $configGlobalFile | Where-Object { $_ -match "^gameId=" }
-    return $gameIdLine -replace "^gameId=", ""
+    $gameIdLine = Get-Content $configGlobalFile | Where-Object { $_ -match "^game-id=" }
+    return $gameIdLine -replace "^game-id=", ""
     
 }
 
 # Function to get the save path from conf.txt
 function Get-SavePath {
-    $savePathLine = Get-Content $configLocalFile | Where-Object { $_ -match "^save_path=" }
-    return $savePathLine -replace "^save_path=", ""
+    $savePathLine = Get-Content $configLocalFile | Where-Object { $_ -match "^save-path=" }
+    return $savePathLine -replace "^save-path=", ""
 }
 
 # Function to load regex patterns from saves.txt
@@ -211,6 +226,7 @@ If you're sure, type the following confirmation exactly:
 
         # Log the reset action
         Log-Action "Folders reset: saves, configs, logs, backup"
+
     } else {
         Write-Host "Confirmation failed. Reset aborted."
     }
@@ -219,14 +235,14 @@ If you're sure, type the following confirmation exactly:
 
 function SetSavePath {
     $savePath = Read-Host "Enter save path"
-    Set-ConfigValue "save_path" $savePath $configLocalFile
+    Set-ConfigValue "save-path" "$savePath" $configLocalFile
     Write-Host "Save path set."
     Log-Action "Set save path to $savePath"
 }
 
 function SetGameId {
     $gameID = Read-Host "Enter game ID (for satisfactory use: 526870)"
-    Set-ConfigValue "gameId" $gameID $configGlobalFile
+    Set-ConfigValue "game-id" $gameID $configGlobalFile
     Write-Host "Game ID set."
     Log-Action "Set game ID to $gameID"
 }
@@ -243,7 +259,7 @@ function Push {
 }
 
 function AddSaveRegex {
-    $saveName = Read-Host "Enter regex pattern to match save files, e.g., '^factory.*\.sav$'"
+    $saveName = Read-Host "Enter regex pattern to match save files, e.g., ^factory.*\.sav$"
     $saveName | Add-Content $savesFile
     Write-Host "Save name added."
     Log-Action "Added save name $saveName"
@@ -282,6 +298,8 @@ function CopySaves {
 
 
 function Setup {
+    # 0. Reset
+    Reset-Folders
     # 1. Set Game ID
     SetGameId
     # 2. Set Save Path
