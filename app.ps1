@@ -1,11 +1,11 @@
 . ./common/logger.ps1
 
 # File paths
-$configLocalFile = "./configs/config-local.txt"
-$configGlobalFile = "./configs/config.txt"
-$savesFile = "./configs/saves.txt"
-$savesDir = "./saves"
-$backupDir = "./backup"
+$configLocalFile = Resolve-Path "./configs/config-local.txt"
+$configGlobalFile =  Resolve-Path "./configs/config.txt"
+$savesFile =  Resolve-Path "./configs/saves.txt"
+$savesDir =  Resolve-Path "./saves"
+$backupDir =  Resolve-Path "./backup"
 
 # Ensure necessary directories exist
 if (-not (Test-Path -Path $savesDir)) {
@@ -315,6 +315,32 @@ function Setup {
     Log-Action "Setup complete."
 
 }
+function Create-Shortcuts {
+    $appPath = Resolve-Path ".\app.ps1"
+    $runGamePath = Resolve-Path ".\run.ps1"
+   
+    $runGameShortcutPath = "$env:USERPROFILE\Desktop\RunFactoryGame.lnk"
+    $syncSavesShortcutPath = "$env:USERPROFILE\Desktop\SyncFactorySaves.lnk"
+
+    # Create a shortcut to run the game
+    $WScriptShell = New-Object -ComObject WScript.Shell
+    $Shortcut = $WScriptShell.CreateShortcut($runGameShortcutPath)
+    $Shortcut.TargetPath = "powershell.exe"
+    $Shortcut.Arguments = "-File $runGamePath"
+    $Shortcut.WorkingDirectory = $PSScriptRoot
+    $Shortcut.Save()
+
+    # Create a shortcut to sync saves
+    $Shortcut = $WScriptShell.CreateShortcut($syncSavesShortcutPath)
+    $Shortcut.TargetPath = "powershell.exe"
+    $Shortcut.Arguments = "-File $appPath sync-saves"
+    $Shortcut.WorkingDirectory = $PSScriptRoot
+    $Shortcut.Save()
+
+    Write-Host "Shortcuts created on desktop."
+    Log-Action "Shortcuts created on desktop."
+    
+}
 
 # Commands
 switch ($args[0]) {
@@ -361,9 +387,13 @@ switch ($args[0]) {
         Setup
     }
 
+    "create-shortcuts" {
+        Create-Shortcuts
+    }
+
 
     Default {
-        Write-Host "Invalid command. Use one of the following:"
+        Write-Host "$args[0] is not a valid command, use one of the following:"
         Write-Host "set-save-path, set-game-id, add-save-name, push, pull, copy-saves, sync-save-locally, sync-saves, reset, setup"
         Log-Action "Invalid command: $args[0]"
     }

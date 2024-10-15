@@ -1,5 +1,4 @@
-. ./app.ps1
-
+$appPath = Resolve-Path ".\app.ps1"
 
 # Function to run the game
 function Run-Game {
@@ -9,9 +8,7 @@ function Run-Game {
 
     # Sync the saves
     Write-Host "Syncing saves..."
-    Sync-SavesLocally
-    Write-Host "Pushing changes..."
-    Push
+    & powershell -File $appPath "sync-saves"
 
 
 
@@ -19,11 +16,11 @@ function Run-Game {
     $gameID = Get-GameId
     # Start the game process
     Write-Host "Starting the game..."
-    Log-Action "Start-Process steam://rungameid/$gameID -PassThru"
+
     $gameProcess = Start-Process steam://rungameid/$gameID -PassThru
 
     Write-Host "Game Process ID: $($gameProcess.Id)"
-    Log-Action "Game Process ID: $($gameProcess.Id)"
+   
 
 
    
