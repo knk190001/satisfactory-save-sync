@@ -36,3 +36,8 @@ switch ($args[0]) {
         Create-RunGameShortcut
     }
 }
+
+
+# exit after user presses a key
+Write-Host "Press any key to exit..."
+$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
