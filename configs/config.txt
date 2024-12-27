@@ -1,1 +1,2 @@
 game-id=526870
+save-path=C:\Users\sfxde\AppData\Local\FactoryGame\Saved\SaveGames\76561198251921502
